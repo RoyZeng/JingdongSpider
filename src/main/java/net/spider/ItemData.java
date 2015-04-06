@@ -17,13 +17,6 @@ public class ItemData {
     public ItemData() {
     }
 
-    public ItemData(int ID, String Name) {
-        this.ID = ID;
-        this.Name = Name;
-    }
-
-
-
     public ItemData(int ID, String Name, double Price, String Brand, String Model, String Date, int Rate, List<String> ReviewList) {
         this.ID = ID;
         this.Name = Name;
