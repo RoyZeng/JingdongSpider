@@ -14,8 +14,8 @@ public class DataProcessor {
     }
 
     /**
+     * Static method
      * ItemData array to json string
-     *
      * @param dataList
      * @return
      */
@@ -25,8 +25,8 @@ public class DataProcessor {
     }
 
     /**
+     * Static method
      * json string to ItemData array
-     *
      * @param jsonData
      * @return
      */
@@ -37,7 +37,7 @@ public class DataProcessor {
     }
 
     /**
-     *
+     ** Static method
      * @param filePath
      * @param data data to be written to file
      * @throws IOException
