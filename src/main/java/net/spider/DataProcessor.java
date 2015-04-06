@@ -47,5 +47,4 @@ public class DataProcessor {
         fw.write(data);
         fw.close();
     }
-
 }
