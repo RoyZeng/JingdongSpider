@@ -1,10 +1,11 @@
 package net.spider;
 
-import java.util.Date;
 import java.util.List;
+import net.sf.json.JSONObject;
 
 public class ItemData {
 
+    private int ID;
     private String Name;
     private double Price;
     private String Brand;
@@ -12,8 +13,30 @@ public class ItemData {
     private String Date;    
     private int Rate;
     private List<String> ReviewList;
-    private int ID;
 
+    public ItemData() {
+    }
+
+    public ItemData(int ID, String Name) {
+        this.ID = ID;
+        this.Name = Name;
+    }
+
+
+
+    public ItemData(int ID, String Name, double Price, String Brand, String Model, String Date, int Rate, List<String> ReviewList) {
+        this.ID = ID;
+        this.Name = Name;
+        this.Price = Price;
+        this.Brand = Brand;
+        this.Model = Model;
+        this.Date = Date;
+        this.Rate = Rate;
+        this.ReviewList = ReviewList;
+    }
+
+    
+    
     /**
      * Get the value of ID
      *
@@ -167,7 +190,7 @@ public class ItemData {
 
     @Override
     public String toString() {
-        return super.toString(); //To change body of generated methods, choose Tools | Templates.
+        return JSONObject.fromObject(this).toString();
     }
     
 
