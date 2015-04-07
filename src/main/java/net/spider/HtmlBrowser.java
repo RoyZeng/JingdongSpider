@@ -14,7 +14,7 @@ public class HtmlBrowser {
     public HtmlBrowser() {
         webClient = new WebClient();
         // 1 启动JS
-        webClient.getOptions().setJavaScriptEnabled(true);
+        webClient.getOptions().setJavaScriptEnabled(false);
         // 2 禁用Css，可避免自动二次请求CSS进行渲染
         webClient.getOptions().setCssEnabled(false);
         // 3 启动客户端重定向
@@ -33,8 +33,16 @@ public class HtmlBrowser {
             Logger.getLogger(HtmlBrowser.class.getName()).log(Level.SEVERE, null, ex);
         }
         // 等待JS驱动dom完成获得还原后的网页
-        webClient.waitForBackgroundJavaScript(10000);
+//        webClient.waitForBackgroundJavaScript(10000);
         return htmlPage;
+    }
+
+    public void enbaleJS() {
+        webClient.getOptions().setJavaScriptEnabled(true);
+    }
+
+    public void disableJS() {
+        webClient.getOptions().setJavaScriptEnabled(false);
     }
 
     public void close() {
