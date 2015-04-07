@@ -4,6 +4,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import net.sf.json.JSONArray;
 
 public class Spider {
@@ -18,9 +19,10 @@ public class Spider {
      * start crawl from here
      */
     void excuteSpider() throws Exception {
-        List<String> AllAnchors = getAllAnchors(entryUrl, 200);
+        List<String> AllAnchors = getAllAnchors(entryUrl);
+    	//List<String> AllAnchors = getAllAnchors(entryUrl);
         //record all links in a file
-        DataProcessor.string2File("z:/test.txt", JSONArray.fromObject(AllAnchors).toString());
+        DataProcessor.string2File("E:/test.txt", JSONArray.fromObject(AllAnchors).toString());
 
     }
 
@@ -30,17 +32,20 @@ public class Spider {
      * @param url
      * @return
      */
-    List<String> getAllAnchors(String url, int maxmium) throws Exception {
+    //List<String> getAllAnchors(String url, int maxmium) throws Exception {
+    List<String> getAllAnchors(String url) throws Exception {
         List<String> linkPage = new ArrayList<>();
         String pageUrl = url;
+        String pageUrl_next=getNextPages(pageUrl);
         do {
             List<String> nextLinks = getOnePageAnchors(pageUrl);
             linkPage.addAll(nextLinks);
             pageUrl = getNextPages(pageUrl);
-            if (linkPage.size() > maxmium) {
+            pageUrl_next=getNextPages(pageUrl);
+            /*if (linkPage.size() > maxmium) {
                 return linkPage;
-            }
-        } while (!pageUrl.isEmpty());
+            }*/
+        } while (!pageUrl_next.equals("http://list.jd.com/list.html?cat=9987%2C653%2C655&page=48&JL=6_0_0"));
         return linkPage;
     }
 
@@ -55,7 +60,7 @@ public class Spider {
             String link_1 = href.substring(startIndex_1 + 1, endIndex_1);
             hrefArray.add(link_1);
         }
-        System.out.print(hrefArray);
+        //System.out.print(hrefArray);
         return hrefArray;
     }
 
@@ -66,6 +71,7 @@ public class Spider {
         int startIndex = nextPage.indexOf("/");
         int endIndex = nextPage.indexOf("]");
         String nextPage_f = "http://list.jd.com/" + nextPage.substring(startIndex + 1, endIndex);
+        System.out.println(nextPage_f);
         return nextPage_f;
     }
 
@@ -77,7 +83,6 @@ public class Spider {
      */
     ItemData getItemDataFromHtmlPage(HtmlPage htmlPage) {
 
-        ItemData item = new ItemData();
         String id = htmlPage.getFirstByXPath("//*[@id='parameter2']/li[2]/text()");
         System.out.print(id);
 
