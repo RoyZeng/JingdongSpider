@@ -1,8 +1,10 @@
 package net.spider;
 
+import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,8 +35,15 @@ public class HtmlBrowser {
             Logger.getLogger(HtmlBrowser.class.getName()).log(Level.SEVERE, null, ex);
         }
         // 等待JS驱动dom完成获得还原后的网页
-//        webClient.waitForBackgroundJavaScript(10000);
+        //webClient.waitForBackgroundJavaScript(10000);
         return htmlPage;
+    }
+      
+   public HtmlPage getHtmlPageAfterClick(HtmlPage htmlPage) throws Exception{
+		htmlPage = (HtmlPage) htmlPage.getAnchorByHref("#comment").click();
+		// 等待JS驱动dom完成获得还原后的网页
+		webClient.waitForBackgroundJavaScript(10000);
+    	return htmlPage;
     }
 
     public void enbaleJS() {
