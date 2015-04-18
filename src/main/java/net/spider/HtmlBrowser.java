@@ -3,6 +3,7 @@ package net.spider;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;//*
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import java.io.IOException;
@@ -39,12 +40,6 @@ public class HtmlBrowser {
         return htmlPage;
     }
       
-   public HtmlPage getHtmlPageAfterClick(HtmlPage htmlPage) throws Exception{
-		htmlPage = (HtmlPage) htmlPage.getAnchorByHref("#comment").click();
-		// 等待JS驱动dom完成获得还原后的网页
-		webClient.waitForBackgroundJavaScript(10000);
-    	return htmlPage;
-    }
 
     public void enbaleJS() {
         webClient.getOptions().setJavaScriptEnabled(true);

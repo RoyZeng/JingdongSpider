@@ -1,19 +1,28 @@
 package net.spider;
 
 import com.gargoylesoftware.htmlunit.html.DomAttr;
+import com.gargoylesoftware.htmlunit.html.DomText;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.sf.json.JSONArray;
 
 
 public class Spider {
 
     HtmlBrowser htmlBrowser = new HtmlBrowser();
     String entryUrl = "http://list.jd.com/list.html?cat=9987,653,655";
-
+    HtmlPage pageEg=htmlBrowser.getHtmlPage("http://club.jd.com/review/1217499-1-1.html");
+    String judge=pageEg.getFirstByXPath("//*[@id='comment-3']/div/div[2]/div[2]/dl[1]/dt/text()").toString();
     public Spider() {
     }
 
@@ -24,24 +33,20 @@ public class Spider {
         //List<String> AllAnchors = getAllAnchors(entryUrl);
         //record all links in a file
         //DataProcessor.string2File("E:/test.txt", JSONArray.fromObject(AllAnchors).toString());
-        List<ItemData> items = items("z:/test.txt");
+        List<ItemData> items = items("E:/test.txt");
         String data = DataProcessor.itemData2Json(items);
-        DataProcessor.string2File("z:/testItems.txt", data);
+        DataProcessor.string2File("E:/testItems.txt", data);
     }
 
     List<ItemData> items(String path) throws Exception {
         String[] linkArray = DataProcessor.readUrlsFromFile(path);
         int i = 0;
         List<ItemData> items = new ArrayList<>();
-        htmlBrowser.enbaleJS();
         while (i < linkArray.length) {
             System.out.println(linkArray[i]);
             HtmlPage htmlPage = htmlBrowser.getHtmlPage(linkArray[i]);
-            htmlPage = htmlBrowser.getHtmlPageAfterClick(htmlPage);
-
-            FileWriter fileWriter = new FileWriter(new File("z:/testItem" + i + ".txt"));
-            fileWriter.write(htmlPage.asXml());
-            //items.add(getItemDataFromHtmlPage(htmlPage));    		
+            items.add(getItemDataFromHtmlPage(htmlPage));
+            //getItemDataFromHtmlPage(htmlPage);
             i++;
         }
         return items;
@@ -110,8 +115,10 @@ public class Spider {
      *
      * @param htmlPage
      * @return
+     * @throws Exception 
+     * @throws Exception 
      */
-    ItemData getItemDataFromHtmlPage(HtmlPage htmlPage) {
+    ItemData getItemDataFromHtmlPage(HtmlPage htmlPage) throws Exception{
         ItemData item = new ItemData();
         //id
         DomAttr attribute = (DomAttr) htmlPage.getFirstByXPath("//*[@id='parameter2']/li[2]/@title");
@@ -127,11 +134,24 @@ public class Spider {
         item.setName(Name);
 
         //price
-        String priceString = htmlPage.getFirstByXPath("//*[@id='jd-price']/text()").toString().substring(1);
-        double Price = Double.parseDouble(priceString);
-        System.err.println(Price);
-        item.setPrice(Price);
-
+    	String line;
+    	StringBuffer pageBuffer = new StringBuffer();
+    	URL pageUrl=new URL("http://p.3.cn/prices/mgets?skuIds=J_"+idString+"&type=1");
+    	try {
+    		BufferedReader br = new BufferedReader(new InputStreamReader(pageUrl.openStream()));
+    		while ((line = br.readLine()) != null) {
+    			pageBuffer = pageBuffer.append(line);
+    		}
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	int startIndex=pageBuffer.indexOf("p")+4;
+    	int endIndex=pageBuffer.lastIndexOf(":")-5;
+    	String priceString=pageBuffer.substring(startIndex, endIndex);
+    	System.err.println(priceString);
+    	double Price=Double.parseDouble(priceString);
+    	item.setPrice(Price);
+        
         //brand
         String Brand = htmlPage.getFirstByXPath("//div[@id='product-detail-2']/table/tbody/tr[3]/td[2]/text()").toString();
         System.err.println(Brand);
@@ -140,24 +160,39 @@ public class Spider {
         //date
         String Date = htmlPage.getFirstByXPath("//div[@id='product-detail-2']/table/tbody/tr[6]/td[2]/text()").toString();
         System.err.println(Date);
-        item.setBrand(Date);
+        item.setDate(Date);
 
         //model
         String Model = htmlPage.getFirstByXPath("//div[@id='product-detail-2']/table/tbody/tr[4]/td[2]/text()").toString();
         System.err.println(Model);
-        item.setBrand(Model);
+        item.setModel(Model);
 
         //rate
-        String rateString = htmlPage.getFirstByXPath("//div[@id='i-comment']/div[1]/strong/text()").toString();
-        int Rate = Integer.parseInt(rateString);
-        System.err.println(Rate);
-        item.setRate(Rate);
-
+		HtmlPage page=htmlBrowser.getHtmlPage("http://club.jd.com/review/"+idString+"-1-1.html");
+		DomText rateString=page.getFirstByXPath("//*[@id='i-comment']/div[1]/strong/text()");
+		int Rate = Integer.parseInt(rateString.toString());
+	    System.err.println(rateString);
+	    item.setRate(Rate);
+	    
         //reviewList
-        final List<String> ReviewList = (List<String>) htmlPage.getByXPath("//*[@id='comment-0']/div[2]/div/table/tbody/tr/td[1]/div[1]/span/text()");
+	    List<String> ReviewList=new ArrayList<>();
+        int i=0;
+	    while(true){
+	    	try{	  
+	    		String Review=null;
+	    		String judge1=page.getFirstByXPath("//*[@id='comment-"+i+"']/div/div[2]/div[2]/dl[1]/dt/text()").toString();	    		
+	    		if(judge1.equals(judge)) 
+	    			 Review=page.getFirstByXPath("//*[@id='comment-"+i+"']/div/div[2]/div[2]/dl[1]/dd/text()").toString();
+	    		else Review=page.getFirstByXPath("//*[@id='comment-"+i+"']/div/div[2]/div[2]/dl[2]/dd/text()").toString();
+		    		ReviewList.add(Review.toString());   		
+		        	i++;	
+	    	}catch (Exception e){
+	        	break;
+	    	}
+        }
         System.err.println(ReviewList);
         item.setReviewList(ReviewList);
-
+        
         return item;
     }
 
