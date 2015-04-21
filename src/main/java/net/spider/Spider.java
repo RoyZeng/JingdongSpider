@@ -12,17 +12,20 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;//
 
 
 public class Spider {
 
     HtmlBrowser htmlBrowser = new HtmlBrowser();
     String entryUrl = "http://list.jd.com/list.html?cat=9987,653,655";
-    HtmlPage pageEg=htmlBrowser.getHtmlPage("http://club.jd.com/review/1217499-1-1.html");
-    String judge=pageEg.getFirstByXPath("//*[@id='comment-3']/div/div[2]/div[2]/dl[1]/dt/text()").toString();
+    //int threadCount = 50; //线程数量    
+    //public static final Object signal = new Object();   //线程间通信变量  
+        
     public Spider() {
     }
 
@@ -38,20 +41,31 @@ public class Spider {
         DataProcessor.string2File("E:/testItems.txt", data);
     }
 
-    List<ItemData> items(String path) throws Exception {
+   List<ItemData> items(String path) throws Exception {
         String[] linkArray = DataProcessor.readUrlsFromFile(path);
+        List<String> linkArrayList=Arrays.asList(linkArray);
+        List<String> notCrawlurl = new ArrayList(linkArrayList);
         int i = 0;
         List<ItemData> items = new ArrayList<>();
-        while (i < linkArray.length) {
-            System.out.println(linkArray[i]);
-            HtmlPage htmlPage = htmlBrowser.getHtmlPage(linkArray[i]);
+        int length=linkArray.length;
+        System.out.println(notCrawlurl.size());
+        System.out.println(length);
+        while (i < length) {
+            System.out.println(notCrawlurl.get(0));
+            //
+            String url;
+            synchronized(notCrawlurl.get(0)){  
+                url= notCrawlurl.get(0); 
+                notCrawlurl.remove(0);
+            }
+            HtmlPage htmlPage = htmlBrowser.getHtmlPage(url);  
             items.add(getItemDataFromHtmlPage(htmlPage));
-            //getItemDataFromHtmlPage(htmlPage);
             i++;
         }
         return items;
     }
-    
+
+  
     /**
      * Get all the links related to phones from the web page source
      *
@@ -145,9 +159,11 @@ public class Spider {
     	} catch (IOException e) {
     		e.printStackTrace();
     	}
-    	int startIndex=pageBuffer.indexOf("p")+4;
-    	int endIndex=pageBuffer.lastIndexOf(":")-5;
-    	String priceString=pageBuffer.substring(startIndex, endIndex);
+    	String priceString1=pageBuffer.toString();
+    	
+    	JSONArray array=JSONArray.fromObject(priceString1);
+    	JSONObject jsonObject=array.getJSONObject(0);    	  
+    	String priceString = jsonObject.getString("p");   
     	System.err.println(priceString);
     	double Price=Double.parseDouble(priceString);
     	item.setPrice(Price);
@@ -176,6 +192,7 @@ public class Spider {
 	    
         //reviewList
 	    List<String> ReviewList=new ArrayList<>();
+	    String judge="心 得：";  
         int i=0;
 	    while(true){
 	    	try{	  
