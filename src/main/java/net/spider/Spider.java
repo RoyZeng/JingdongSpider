@@ -19,53 +19,70 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;//
 
 
-public class Spider {
+public class Spider extends Thread{
 
     HtmlBrowser htmlBrowser = new HtmlBrowser();
     String entryUrl = "http://list.jd.com/list.html?cat=9987,653,655";
-    //int threadCount = 50; //线程数量    
-    //public static final Object signal = new Object();   //线程间通信变量  
-        
-    public Spider() {
+    public int count=0;
+    public int threadCount = 50;
+    List<ItemData> items=new ArrayList<>();
+    public Spider(int count1) {
+    	count=count1;
     }
 
     /**
      * start crawl from here
-     */
-    void excuteSpider() throws Exception {
+     */ 
+    public void run() {
         //List<String> AllAnchors = getAllAnchors(entryUrl);
         //record all links in a file
-        //DataProcessor.string2File("E:/test.txt", JSONArray.fromObject(AllAnchors).toString());
-        List<ItemData> items = items("E:/test.txt");
+        //DataProcessor.string2File("E:/test.txt", JSONArray.fromObject(AllAnchors).toString());      
+		try {
+			//List<ItemData> item=new ArrayList<>();
+			items = items("E:/test/test.txt",count);
+			//items.addAll(items);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}    	
         String data = DataProcessor.itemData2Json(items);
-        DataProcessor.string2File("E:/testItems.txt", data);
+        try {
+			DataProcessor.string2File("E:/testItems"+count+".txt", data);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        System.out.println(count);
     }
 
-   List<ItemData> items(String path) throws Exception {
+   List<ItemData> items(String path,int i) throws Exception {
         String[] linkArray = DataProcessor.readUrlsFromFile(path);
         List<String> linkArrayList=Arrays.asList(linkArray);
         List<String> notCrawlurl = new ArrayList(linkArrayList);
-        int i = 0;
-        List<ItemData> items = new ArrayList<>();
-        int length=linkArray.length;
-        System.out.println(notCrawlurl.size());
-        System.out.println(length);
-        while (i < length) {
-            System.out.println(notCrawlurl.get(0));
-            //
-            String url;
-            synchronized(notCrawlurl.get(0)){  
-                url= notCrawlurl.get(0); 
-                notCrawlurl.remove(0);
+        List<ItemData> items = new ArrayList<>();      
+        int length=linkArray.length/(threadCount-1);
+        int index=i*length;
+        if(i==threadCount-1){
+        	int j=(threadCount-1)*length;
+        	 while (j < linkArray.length) {        
+             	HtmlPage htmlPage = htmlBrowser.getHtmlPage(linkArray[j]);
+                 items.add(getItemDataFromHtmlPage(htmlPage));
+                 j++;
+             }
+        }
+        else{
+        	int j= index;
+            int end=index+length;
+//            System.out.println(length);
+            while (j < end) {        
+            	HtmlPage htmlPage = htmlBrowser.getHtmlPage(linkArray[j]);
+                items.add(getItemDataFromHtmlPage(htmlPage));
+                j++;
             }
-            HtmlPage htmlPage = htmlBrowser.getHtmlPage(url);  
-            items.add(getItemDataFromHtmlPage(htmlPage));
-            i++;
         }
         return items;
     }
-
-  
+     
     /**
      * Get all the links related to phones from the web page source
      *
@@ -132,12 +149,12 @@ public class Spider {
      * @throws Exception 
      * @throws Exception 
      */
-    ItemData getItemDataFromHtmlPage(HtmlPage htmlPage) throws Exception{
+    public ItemData getItemDataFromHtmlPage(HtmlPage htmlPage){
         ItemData item = new ItemData();
         //id
         DomAttr attribute = (DomAttr) htmlPage.getFirstByXPath("//*[@id='parameter2']/li[2]/@title");
         String idString = attribute.getNodeValue().toString();
-        int ID = Integer.parseInt(idString);
+        Integer ID = Integer.parseInt(idString);
         System.err.println(ID);
         item.setID(ID);
 
@@ -150,7 +167,13 @@ public class Spider {
         //price
     	String line;
     	StringBuffer pageBuffer = new StringBuffer();
-    	URL pageUrl=new URL("http://p.3.cn/prices/mgets?skuIds=J_"+idString+"&type=1");
+    	URL pageUrl = null;
+		try {
+			pageUrl = new URL("http://p.3.cn/prices/mgets?skuIds=J_"+idString+"&type=1");
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     	try {
     		BufferedReader br = new BufferedReader(new InputStreamReader(pageUrl.openStream()));
     		while ((line = br.readLine()) != null) {
@@ -183,11 +206,14 @@ public class Spider {
         System.err.println(Model);
         item.setModel(Model);
 
-        //rate
+        //rate   
 		HtmlPage page=htmlBrowser.getHtmlPage("http://club.jd.com/review/"+idString+"-1-1.html");
 		DomText rateString=page.getFirstByXPath("//*[@id='i-comment']/div[1]/strong/text()");
-		int Rate = Integer.parseInt(rateString.toString());
-	    System.err.println(rateString);
+		Integer Rate=0;
+		if(rateString!=null){
+			Rate = Integer.parseInt(rateString.toString());
+		    System.err.println(rateString);
+		}
 	    item.setRate(Rate);
 	    
         //reviewList
