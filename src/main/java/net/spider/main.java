@@ -1,14 +1,15 @@
 package net.spider;
 
-public class main {
-	
+import org.apache.logging.log4j.LogManager;
+
+public class Main {
+
+    private static org.apache.logging.log4j.Logger logger = LogManager.getLogger(Main.class);
+
     //program entry
-    public static void main(String[] args) throws Exception  {
-    	for(int i=0;i<50;i++){
-        	Spider crawler= new Spider(i);
-            crawler.start();
-    	}
-     
+    public static void main(String[] args) {
+        Spider spider = new Spider();
+        spider.Crawl();
     }
 
 }

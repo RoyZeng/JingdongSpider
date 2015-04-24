@@ -1,9 +1,7 @@
 package net.spider;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;//*
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import java.io.IOException;
@@ -40,7 +38,6 @@ public class HtmlBrowser {
         return htmlPage;
     }
       
-
     public void enbaleJS() {
         webClient.getOptions().setJavaScriptEnabled(true);
     }
