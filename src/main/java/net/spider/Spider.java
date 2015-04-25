@@ -7,13 +7,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Spider {
 
-    private static org.apache.logging.log4j.Logger logger = LogManager.getLogger(Spider.class);
+    private static final Logger logger = LogManager.getLogger(Spider.class);
     public static final String ItemUrlFilePath = "E:/JingdongSpider/resources/PartialItemLinks.txt";
     public static final String entryUrl = "http://list.jd.com/list.html?cat=9987,653,655";
     HtmlBrowser htmlBrowser = new HtmlBrowser();
