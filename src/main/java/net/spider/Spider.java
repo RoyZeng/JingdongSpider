@@ -31,7 +31,7 @@ public class Spider {
      */
     public void Crawl() {
         List<ItemData> itemDataList = new ArrayList<>();
-        
+
         //read url file and split them into pieces to fit the thread number
         String[] ulrArray = DataProcessor.readUrlsFromFile(ItemUrlFilePath);
         logger.debug(ulrArray.length);
@@ -46,15 +46,15 @@ public class Spider {
                 threadUrlList = urlList.subList(index, index + divisor);
                 index += divisor;
             } else {
-                threadUrlList = urlList.subList(index, ulrArray.length-1);
+                threadUrlList = urlList.subList(index, ulrArray.length - 1);
             }
-            
+
             //create new thread and pass the url list to the thread
             SpiderThread st = new SpiderThread(threadUrlList);
             spiderThreadList.add(st);
             st.start();
         }
-        
+
         //waiting for the end of threads
         for (SpiderThread st : spiderThreadList) {
             try {
@@ -70,7 +70,7 @@ public class Spider {
             itemList.addAll(threadItemDataList);
         }
         logger.info(itemList);
-        
+
         //store the cralwer results into the file
         String data = DataProcessor.itemData2Json(itemList);
         try {
