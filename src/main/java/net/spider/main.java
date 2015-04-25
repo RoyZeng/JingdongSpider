@@ -2,9 +2,9 @@ package net.spider;
 
 import org.apache.logging.log4j.LogManager;
 
-public class Main {
+public class main {
 
-    private static org.apache.logging.log4j.Logger logger = LogManager.getLogger(Main.class);
+    private static org.apache.logging.log4j.Logger logger = LogManager.getLogger(main.class);
 
     //program entry
     public static void main(String[] args) {
