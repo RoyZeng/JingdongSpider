@@ -60,7 +60,7 @@ public class Spider {
             try {
                 st.join();
             } catch (InterruptedException ex) {
-                Logger.getLogger(Spider.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error(ex);
             }
         }
 
