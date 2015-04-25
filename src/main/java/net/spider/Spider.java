@@ -1,29 +1,24 @@
 package net.spider;
 
 import com.gargoylesoftware.htmlunit.html.DomAttr;
-import com.gargoylesoftware.htmlunit.html.DomText;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.logging.log4j.LogManager;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+public class Spider {
 
-public class Spider  {
-
+    private static org.apache.logging.log4j.Logger logger = LogManager.getLogger(Spider.class);
     public static final String ItemUrlFilePath = "E:/JingdongSpider/resources/PartialItemLinks.txt";
     public static final String entryUrl = "http://list.jd.com/list.html?cat=9987,653,655";
     HtmlBrowser htmlBrowser = new HtmlBrowser();
     public int count = 0;
-    public static final int THREAD_NUM =4;
+    public static final int THREAD_NUM = 4;
     List<ItemData> itemList = new ArrayList<>();
     List<SpiderThread> spiderThreadList = new ArrayList<>();
 
@@ -35,37 +30,31 @@ public class Spider  {
      * start crawling the urls and store the page infomation into the file
      */
     public void Crawl() {
-        //read url file and split them into pieces to fit the thread number
-    	String[] linkArray = DataProcessor.readUrlsFromFile(ItemUrlFilePath);
-    	System.out.println(linkArray.length);
-    	List<String> toPassArray=new ArrayList<>();
         List<ItemData> itemDataList = new ArrayList<>();
-        int length = linkArray.length / (THREAD_NUM - 1);
-        //initialize the array of SpiderThread and start the thread
-        for (int i = 0; i < THREAD_NUM; i++) {
-        	toPassArray.clear();
-        	int index=i*length;
-            if(i==THREAD_NUM-1){
-            	int start=(THREAD_NUM-1)*length;
-            	int end=linkArray.length;
-            	while (start<end) {
-             		toPassArray.add(linkArray[start]);
-                    start++;
-                }          
-            }                        	           	                             
-            else{
-            	int end=index+length;
-                while (index < end) {
-              	    toPassArray.add(linkArray[index]);
-                    index++;
-                }  
-             }
-             System.out.println("pass:"+toPassArray);
-             SpiderThread st = new SpiderThread(toPassArray);
-             spiderThreadList.add(st); 
-             st.start();
-        }
+        
+        //read url file and split them into pieces to fit the thread number
+        String[] ulrArray = DataProcessor.readUrlsFromFile(ItemUrlFilePath);
+        logger.debug(ulrArray.length);
+        List<String> urlList = new ArrayList<>(Arrays.asList(ulrArray));
 
+        //initialize the array of SpiderThread and start the thread
+        int divisor = ulrArray.length / THREAD_NUM;
+        int index = 0;
+        for (int i = 0; i < THREAD_NUM; i++) {
+            List<String> threadUrlList;
+            if (index + divisor < ulrArray.length) {
+                threadUrlList = urlList.subList(index, index + divisor);
+                index += divisor;
+            } else {
+                threadUrlList = urlList.subList(index, ulrArray.length-1);
+            }
+            
+            //create new thread and pass the url list to the thread
+            SpiderThread st = new SpiderThread(threadUrlList);
+            spiderThreadList.add(st);
+            st.start();
+        }
+        
         //waiting for the end of threads
         for (SpiderThread st : spiderThreadList) {
             try {
@@ -80,7 +69,8 @@ public class Spider  {
             List<ItemData> threadItemDataList = st.getItemList();
             itemList.addAll(threadItemDataList);
         }
-        System.out.println(itemList);
+        logger.info(itemList);
+        
         //store the cralwer results into the file
         String data = DataProcessor.itemData2Json(itemList);
         try {
@@ -88,7 +78,7 @@ public class Spider  {
         } catch (IOException e) {
         }
     }
-    
+
     /**
      * Get all the links related to phones from the web page source
      *
@@ -97,9 +87,9 @@ public class Spider  {
      */
     //List<String> getAllAnchors(String url, int minium) throws Exception {
     List<String> getAllAnchors(String url) throws Exception {
-        List<String> allPages = new ArrayList<>();
+        List<String> allPages, links;
         allPages = getAllPages(url);
-        List<String> links = new ArrayList<>();
+
         List<String> allLinks = new ArrayList<>();
 
         int i = 0;
@@ -127,7 +117,7 @@ public class Spider  {
     List<String> getAllPages(String url) throws Exception {
         List<String> allPages = new ArrayList<>();
         allPages.add(url);
-        String nextPageString = url;
+        String nextPageString;
 
         while (true) {
             HtmlPage page = htmlBrowser.getHtmlPage(url);

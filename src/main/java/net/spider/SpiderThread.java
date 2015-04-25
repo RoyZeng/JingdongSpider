@@ -14,30 +14,34 @@ import net.sf.json.JSONObject;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomText;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.apache.logging.log4j.LogManager;
 
-public class SpiderThread extends Thread{
+public class SpiderThread extends Thread {
 
+    private static org.apache.logging.log4j.Logger logger = LogManager.getLogger(Spider.class);
     HtmlBrowser htmlBrowser = new HtmlBrowser();
     List<String> urlList;
     List<ItemData> itemDataList = new ArrayList<>();
-    
+
     public SpiderThread(List<String> urlList) {
         this.urlList = urlList;
     }
 
     @Override
     public void run() {
-        int i=0;
-        System.out.println("run:"+urlList);
+        int i = 0;
+        System.out.println("run:" + urlList);
         while (i < urlList.size()) {
             HtmlPage htmlPage = htmlBrowser.getHtmlPage(urlList.get(i));
             itemDataList.add(getItemDataFromHtmlPage(htmlPage));
             i++;
-        }    
+        }
     }
-    List<ItemData> getItemList(){
-        return  itemDataList;
+
+    List<ItemData> getItemList() {
+        return itemDataList;
     }
+
     /**
      * Crawl infomation from web page and store them in object ItemData
      *
