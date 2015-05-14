@@ -1,6 +1,8 @@
 package net.spider;
 
+import java.util.Calendar;
 import java.util.List;
+
 import net.sf.json.JSONObject;
 
 public class ItemData {
@@ -13,6 +15,7 @@ public class ItemData {
     private String Date;    
     private int Rate;
     private List<String> ReviewList;
+    private String CrawlDate;
 
     public ItemData() {
     }
@@ -26,6 +29,7 @@ public class ItemData {
         this.Date = Date;
         this.Rate = Rate;
         this.ReviewList = ReviewList;
+        this.CrawlDate=CrawlDate;
     }
 
     
@@ -178,7 +182,25 @@ public class ItemData {
      * @param Name new value of Name
      */
     public void setName(String Name) {
-        this.Name = Name;
+    	this.Name=Name;
+    }
+    
+    /**
+     * Get the value of Name
+     *
+     * @return the value of Name
+     */
+    public String getCrawlDate() {
+    	return CrawlDate;
+    }
+
+    /**
+     * Set the value of Name
+     *
+     * @param Name new value of Name
+     */
+    public void setCrawlDate(String CrawlDate) {
+    	this.CrawlDate=CrawlDate;    	
     }
 
     @Override

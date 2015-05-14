@@ -17,7 +17,7 @@ public class Spider {
     public static final String entryUrl = "http://list.jd.com/list.html?cat=9987,653,655";
     HtmlBrowser htmlBrowser = new HtmlBrowser();
     public int count = 0;
-    public static final int THREAD_NUM = 4;
+    public static final int THREAD_NUM = 15;
     List<ItemData> itemList = new ArrayList<>();
     List<SpiderThread> spiderThreadList = new ArrayList<>();
 

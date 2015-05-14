@@ -38,7 +38,7 @@ public class HtmlBrowser {
         return htmlPage;
     }
       
-    public void enbaleJS() {
+    public void enableJS() {
         webClient.getOptions().setJavaScriptEnabled(true);
     }
 

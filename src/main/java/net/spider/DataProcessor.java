@@ -69,4 +69,20 @@ public class DataProcessor {
         String[] urls = (String[]) JSONArray.toArray(jarray, String.class);
         return urls;
     }
+    
+    public static ItemData[] readItemsFromFile(String path) {
+        BufferedReader br = null;
+        String fileContent = null;
+        try {
+            br = new BufferedReader(new FileReader(new File(path)));
+            fileContent = br.readLine();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(DataProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(DataProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        JSONArray jarray = JSONArray.fromObject(fileContent);
+        ItemData[] items = (ItemData[]) JSONArray.toArray(jarray, ItemData.class);
+        return items;
+    }
 }
